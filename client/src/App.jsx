@@ -16,6 +16,13 @@ import PatientDashboard from './pages/Dashboards/Patient/PatientDashboard'
 import DonorDashboard from './pages/Dashboards/Donor/DonorDashboard'
 import DonorSearchForm from './pages/SearchForDonors/SearchForDonors'
 import CompatibilitySearch from './pages/SearchForDonors/CompatibilitySearch'
+import DonationProcess from './pages/DonationProcess/DonationProcess'
+import Eligibility from './pages/Eligibility/Eligibility'
+import HowToDonate from './pages/HowToDonate/HowToDonate'
+import Volunteer from './pages/Volunteer/Volunteer'
+import SpreadAwareness from './pages/SpreadAwareness/SpreadAwareness'
+import ShareExperience from './pages/ShareExperience/ShareExperience'
+import PageTransition from './components/ui/PageTransition'
 
 
 export default function App() {
@@ -29,19 +36,19 @@ export default function App() {
         children:[
           {
             path: '/',
-            element: <Home />
+            element: <PageTransition><Home /></PageTransition>
           },
           {
             path: '/about',
-            element: <About />
+            element: <PageTransition><About /></PageTransition>
           },
           {
             path: '/contact',
-            element: <Contact />
+            element: <PageTransition><Contact /></PageTransition>
           },
           {
             path: '/login',
-            element: <Login />
+            element: <PageTransition><Login /></PageTransition>
           },
           {
             path: '/logout',
@@ -49,11 +56,35 @@ export default function App() {
           },
           {
             path: '/search/Donors',
-            element: <DonorSearchForm />
+            element: <PageTransition><DonorSearchForm /></PageTransition>
           },
           {
             path: '/compatible-search',
-            element: <CompatibilitySearch />
+            element: <PageTransition><CompatibilitySearch /></PageTransition>
+          },
+          {
+            path: '/donation-process',
+            element: <PageTransition><DonationProcess /></PageTransition>
+          },
+          {
+            path: '/eligibility',
+            element: <PageTransition><Eligibility /></PageTransition>
+          },
+          {
+            path: '/how-to-donate',
+            element: <PageTransition><HowToDonate /></PageTransition>
+          },
+          {
+            path: '/volunteer',
+            element: <PageTransition><Volunteer /></PageTransition>
+          },
+          {
+            path: '/spread-awareness',
+            element: <PageTransition><SpreadAwareness /></PageTransition>
+          },
+          {
+            path: '/share-experience',
+            element: <PageTransition><ShareExperience /></PageTransition>
           },
           {
             path: '/registration',
@@ -61,30 +92,30 @@ export default function App() {
             children: [
               {
                 path: '',
-                element: <Registration_Email />
+                element: <PageTransition><Registration_Email /></PageTransition>
               },
               {
                 path: 'verification-code',
-                element: <EmailVerificationCode />
+                element: <PageTransition><EmailVerificationCode /></PageTransition>
               },
               {
                 path: 'user-data',
-                element: <Register />
+                element: <PageTransition><Register /></PageTransition>
               }
             ]
           },
           // Protected Dashboards
           {
             path: '/admin/:id/dashboard',
-            element: <ProtectedRoute allowedRole="admin" element={<AdminDashboard />} />
+            element: <ProtectedRoute allowedRole="admin" element={<PageTransition><AdminDashboard /></PageTransition>} />
           },
           {
             path: '/patient/:id/dashboard',
-            element: <ProtectedRoute allowedRole="patient" element={<PatientDashboard />}/>
+            element: <ProtectedRoute allowedRole="patient" element={<PageTransition><PatientDashboard /></PageTransition>}/>
           },
           {
             path: '/donor/:id/dashboard',
-            element: <ProtectedRoute allowedRole="donor" element={<DonorDashboard />} />
+            element: <ProtectedRoute allowedRole="donor" element={<PageTransition><DonorDashboard /></PageTransition>} />
           }
         ]
       }

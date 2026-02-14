@@ -1,199 +1,161 @@
-import React, { useState } from "react";
-import {NavLink, useNavigate} from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
-
+import { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useTheme } from "../../context/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, Sun, Moon, Droplets, Search } from "lucide-react";
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
-  const {role, token,id} = useSelector((state) => state.loginLogoutSlice)
-  console.log(role, token)
-  const handleDonorsBtn = () => {
-    navigate('/search/Donors')
-  }
-  return (
-    <header className="bg-white shadow-md px-4 py-3 flex items-center justify-between md:justify-around">
-      {/* Left - Logo and Name */}
-      <div className="flex items-center space-x-2">
-        {/* Example SVG logo */}
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C7 7 4 11 4 14a8 8 0 1016 0c0-3-3-7-8-12z" />
-        </svg>
-        <span className="text-lg font-bold text-red-600">LifeSaver System</span>
-      </div>
+  const { role, token, id } = useSelector((state) => state.loginLogoutSlice);
+  const { darkMode, toggleDarkMode } = useTheme();
 
-      {/* Center - Navigation links (hidden on small screens) */}
-      <nav className="hidden md:flex space-x-6 font-medium">
-        <NavLink
-          to={""}
-          className={({ isActive }) =>
-            `block px-3 py-1 rounded transition ${
-              isActive
-                ? 'bg-red-600 text-white px-4'
-                : 'text-red-600 hover:underline hover:bg-red-50'
-            }`
-          }
-        >
-          Home
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleDonorsBtn = () => navigate("/search/Donors");
+
+  const linkClass = ({ isActive }) =>
+    `block px-3 py-2 rounded-lg transition font-medium text-sm ${
+      isActive
+        ? "bg-primary-600 text-white"
+        : "text-gray-700 dark:text-gray-200 hover:bg-primary-50 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400"
+    }`;
+
+  const navLinks = (
+    <>
+      <NavLink to="" className={linkClass} onClick={() => setMenuOpen(false)}>
+        Home
+      </NavLink>
+
+      {token && role === "admin" && (
+        <NavLink to={`/admin/${id}/dashboard`} className={linkClass} onClick={() => setMenuOpen(false)}>
+          Admin Dashboard
         </NavLink>
+      )}
 
-        {token && role === "admin" && (
-            <NavLink to={`/admin/${id}/dashboard`}
-            className={({ isActive }) =>
-              `block px-3 py-1 rounded transition ${
-                isActive
-                  ? 'bg-red-600 text-white px-4'
-                  : 'text-red-600 hover:underline hover:bg-red-50'
-              }`
-            }
-            >
-            Admin Dashboard
-          </NavLink>
-        )}
-
-        {token && role === "patient" && (
-          <NavLink to={`/patient/${id}/dashboard`} 
-          className={({ isActive }) =>
-            `block px-3 py-1 rounded transition ${
-              isActive
-                ? 'bg-red-600 text-white px-4'
-                : 'text-red-600 hover:underline hover:bg-red-50'
-            }`
-          }>
-            Patient Dashboard
-          </NavLink>
-        )}
-
-        {token && role === "donor" && (
-          <NavLink to={`/donor/${id}/dashboard`} 
-          className={({ isActive }) =>
-            `block px-3 py-1 rounded transition ${
-              isActive
-                ? 'bg-red-600 text-white px-4'
-                : 'text-red-600 hover:underline hover:bg-red-50'
-            }`
-          }
-          >
-            Donor Dashboard
-          </NavLink>
-        )}
-
-        <NavLink
-          to={"/about"}
-          className={({ isActive }) =>
-            `block px-3 py-1 rounded transition ${
-              isActive
-                ? 'bg-red-600 text-white px-4'
-                : 'text-red-600 hover:underline hover:bg-red-50'
-            }`
-          }
-        >
-          About Us
+      {token && role === "patient" && (
+        <NavLink to={`/patient/${id}/dashboard`} className={linkClass} onClick={() => setMenuOpen(false)}>
+          Patient Dashboard
         </NavLink>
+      )}
 
-        <NavLink
-          to={"/contact"}
-          className={({ isActive }) =>
-            `block px-3 py-1 rounded transition ${
-              isActive
-                ? 'bg-red-600 text-white px-4'
-                : 'text-red-600 hover:underline hover:bg-red-50'
-            }`
-          }
-        >
-          Contact
+      {token && role === "donor" && (
+        <NavLink to={`/donor/${id}/dashboard`} className={linkClass} onClick={() => setMenuOpen(false)}>
+          Donor Dashboard
         </NavLink>
+      )}
 
-        {
-          !token ? (
-            <NavLink
-          to={"/login"}
-          className={({ isActive }) =>
-            `block px-3 py-1 rounded transition ${
-              isActive
-                ? 'bg-red-600 text-white px-4'
-                : 'text-red-600 hover:underline hover:bg-red-50'
-            }`
-          }
-        >
+      <NavLink to="/about" className={linkClass} onClick={() => setMenuOpen(false)}>
+        About Us
+      </NavLink>
+
+      <NavLink to="/contact" className={linkClass} onClick={() => setMenuOpen(false)}>
+        Contact
+      </NavLink>
+
+      {!token ? (
+        <NavLink to="/login" className={linkClass} onClick={() => setMenuOpen(false)}>
           Login
         </NavLink>
-
-          ): <NavLink
-          to={"/logout"}
-          className={({ isActive }) =>
-            `block px-3 py-1 rounded transition ${
-              isActive
-                ? 'bg-red-600 text-white px-4'
-                : 'text-red-600 hover:underline hover:bg-red-50'
-            }`
-          }
-        >
+      ) : (
+        <NavLink to="/logout" className={linkClass} onClick={() => setMenuOpen(false)}>
           Logout
         </NavLink>
-        }
-
-
-        {
-        !token && (
-          <NavLink
-            to="/register"
-            className={({ isActive }) =>
-              `block px-3 py-1 rounded transition ${
-                isActive
-                  ? 'bg-red-600 text-white px-4'
-                  : 'text-red-600 hover:underline hover:bg-red-50'
-              }`
-            }
-          >
-            Register
-          </NavLink>
-        )
-        }
-
-      </nav>
-
-
-
-      {/* Right - Search Button (centered on small screens) */}
-      <div className="hidden md:flex">
-        <button className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition duration-300" onClick={handleDonorsBtn}>
-          Search for Donors
-        </button>
-      </div>
-
-      {/* Toggle & Mobile Button */}
-      <div className="flex md:hidden items-center space-x-2">
-        <button className="bg-red-600 text-white px-4 py-2 rounded-md">
-          Search for Donors
-        </button>
-        <button
-          className="text-red-600 focus:outline-none"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {/* Hamburger Icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24" 
-            stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile Menu Dropdown */}
-      {menuOpen && (
-        <div className="absolute top-16 left-0 w-full bg-white my-4 shadow-md py-2 px-6 flex flex-col space-y-3 md:hidden z-10 text-center">
-          <a href="#" className="text-red-600">Home</a>
-          <a href="#" className="text-red-600">About Us</a>
-          <a href="#" className="text-red-600">Contact</a>
-          <a href="#" className="text-red-600">Login</a>
-          <a href="#" className="text-red-600">Register</a>
-        </div>
       )}
+
+      {!token && (
+        <NavLink to="/registration" className={linkClass} onClick={() => setMenuOpen(false)}>
+          Register
+        </NavLink>
+      )}
+    </>
+  );
+
+  return (
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg"
+          : "bg-white dark:bg-gray-900 shadow-md"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        {/* Logo */}
+        <NavLink to="/" className="flex items-center space-x-2 group">
+          <Droplets className="w-8 h-8 text-primary-600 group-hover:scale-110 transition-transform" />
+          <span className="text-lg font-bold font-heading text-primary-600 dark:text-primary-400">
+            LifeSaver System
+          </span>
+        </NavLink>
+
+        {/* Desktop Nav */}
+        <nav className="hidden lg:flex items-center space-x-1">
+          {navLinks}
+        </nav>
+
+        {/* Right Actions */}
+        <div className="flex items-center space-x-2">
+          {/* Dark mode toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+
+          {/* Search for Donors */}
+          <button
+            className="hidden md:inline-flex items-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition"
+            onClick={handleDonorsBtn}
+          >
+            <Search className="w-4 h-4" />
+            Search Donors
+          </button>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="lg:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="lg:hidden overflow-hidden border-t border-gray-200 dark:border-gray-700"
+          >
+            <nav className="flex flex-col space-y-1 p-4 bg-white dark:bg-gray-900">
+              {navLinks}
+              <button
+                className="mt-2 flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition"
+                onClick={() => {
+                  handleDonorsBtn();
+                  setMenuOpen(false);
+                }}
+              >
+                <Search className="w-4 h-4" />
+                Search Donors
+              </button>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

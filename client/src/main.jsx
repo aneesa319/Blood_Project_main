@@ -5,14 +5,17 @@ import App from './App.jsx'
 import { ToastContainer} from 'react-toastify';
 import {Provider} from "react-redux"
 import store from './store/store.js';
+import { ThemeProvider } from './context/ThemeContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Provider store={store}>
-    <App />
-    <ToastContainer 
-      bodyClassName="toastBody"
-    />
-    </Provider>
+    <ThemeProvider>
+      <Provider store={store}>
+        <App />
+        <ToastContainer
+          bodyClassName="toastBody"
+        />
+      </Provider>
+    </ThemeProvider>
   </StrictMode>,
 )

@@ -46,6 +46,9 @@ const registerSlice = createSlice(
             updateStatus: (state, action) => {
                 console.log("action payload in update status",action.payload)
                 state.status = action.payload;
+            },
+            setEmailDirectly: (state, action) => {
+                state.email = action.payload;
             }
         },
         extraReducers: (builder) => {
@@ -98,5 +101,5 @@ const registerSlice = createSlice(
 )
 
 
-export const { updateStatus } = registerSlice.actions;
+export const { updateStatus, setEmailDirectly } = registerSlice.actions;
 export default registerSlice.reducer;

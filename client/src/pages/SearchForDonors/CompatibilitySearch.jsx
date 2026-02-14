@@ -1,31 +1,30 @@
-import React, { useState } from "react";
-import axios from "axios";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../../api/axiosInstance";
+import DonorCardSkeleton from "../../components/ui/DonorCardSkeleton";
+import AnimatedSection from "../../components/ui/AnimatedSection";
+import DonorMap from "../../components/Map/DonorMap";
+import { Search, Phone, Droplets, Calendar, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 
 function CompatibilitySearch() {
   const [bloodGroup, setBloodGroup] = useState('');
   const [city, setCity] = useState('');
   const [donors, setDonors] = useState([]);
-  const [totalDonors, setTotalDonors] = useState(0); 
-  const [availableCount, setAvailableCount] = useState(0); 
-  const [allDonors, setAllDonors] = useState(0)
+  const [totalDonors, setTotalDonors] = useState(0);
+  const [availableCount, setAvailableCount] = useState(0);
+  const [allDonors, setAllDonors] = useState(0);
   const [loading, setLoading] = useState(false);
   const [pageNum, setPageNum] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [showMap, setShowMap] = useState(true);
   const navigate = useNavigate();
+  const cardRefs = useRef({});
 
   const fetchSpecificDonors = async (obj, page = 1) => {
     try {
       setLoading(true);
-      const res = await axios.post(`http://localhost:5000/api/donors/nearest/byzipcode?page=${page}`, obj);
-      const {
-        donors,
-        totalCompatibleDonors,
-        totalEligibleDonors,
-        totalPages,
-        totalDonors
-      } = res.data;
-
+      const res = await API.post(`/donors/nearest/byzipcode?page=${page}`, obj);
+      const { donors, totalCompatibleDonors, totalEligibleDonors, totalPages, totalDonors } = res.data;
       setDonors(donors);
       setTotalDonors(totalCompatibleDonors);
       setAvailableCount(totalEligibleDonors);
@@ -33,166 +32,145 @@ function CompatibilitySearch() {
       setAllDonors(totalDonors);
     } catch (err) {
       console.error("Failed to fetch compatible donors:", err);
-      navigate('compatible-search');
     } finally {
       setLoading(false);
     }
   };
 
   const handleSearchBtn = () => {
-    if (!bloodGroup || !city) {
-      alert("Please select a blood group and enter a city.");
-      return;
-    }
-
-    const obj = { bloodGroup, city };
-    fetchSpecificDonors(obj, 1);
+    if (!bloodGroup || !city) { alert("Please select a blood group and enter a city."); return; }
+    fetchSpecificDonors({ bloodGroup, city }, 1);
     setPageNum(1);
   };
 
-  const handlePrevBtn = () => {
-    if (pageNum > 1) {
-      const obj = { bloodGroup, city };
-      fetchSpecificDonors(obj, pageNum - 1);
-      setPageNum((prev) => prev - 1);
-    }
-  };
-
-  const handleNextBtn = () => {
-    if (pageNum < totalPages) {
-      const obj = { bloodGroup, city };
-      fetchSpecificDonors(obj, pageNum + 1);
-      setPageNum((prev) => prev + 1);
-    }
-  };
-
   return (
-    <section className="min-h-screen text-white bg-blue-800">
-      <div className="mx-auto  p-12  bg-blue-800 bg-opacity-100 ">
-
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          🔍 Compatibility & Proximity-Based Donor Search
-        </h2>
+    <section className="min-h-screen text-white bg-gradient-to-br from-secondary-800 to-secondary-900 dark:from-gray-900 dark:to-gray-800">
+      <div className="max-w-7xl mx-auto p-8 md:p-12">
+        <AnimatedSection animation="fadeIn">
+          <h2 className="text-2xl font-bold font-heading mb-6 text-center">
+            Compatibility & Proximity-Based Donor Search
+          </h2>
+        </AnimatedSection>
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
-          <select
-            className="text-black p-2 rounded w-full md:w-1/3"
-            value={bloodGroup}
-            onChange={(e) => setBloodGroup(e.target.value)}
-          >
-            <option value="">Select Blood Group</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-          </select>
-
-          <input
-            type="text"
-            placeholder="Enter your city"
-            className="text-black p-2 rounded w-full md:w-1/3"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-          />
-
-          <button
-            className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded font-semibold"
-            onClick={handleSearchBtn}
-          >
-            Search
-          </button>
-        </div>
+        <AnimatedSection animation="slideUp">
+          <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+            <select
+              className="text-gray-800 dark:text-white dark:bg-gray-700 p-2 rounded-lg w-full md:w-1/3 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 outline-none"
+              value={bloodGroup} onChange={(e) => setBloodGroup(e.target.value)}
+            >
+              <option value="">Select Blood Group</option>
+              {["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map(bg => (
+                <option key={bg} value={bg}>{bg}</option>
+              ))}
+            </select>
+            <input
+              type="text" placeholder="Enter your city"
+              className="text-gray-800 dark:text-white dark:bg-gray-700 p-2 rounded-lg w-full md:w-1/3 border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 outline-none"
+              value={city} onChange={(e) => setCity(e.target.value)}
+            />
+            <button className="btn-primary inline-flex items-center gap-2" onClick={handleSearchBtn}>
+              <Search className="w-5 h-5" /> Search
+            </button>
+          </div>
+        </AnimatedSection>
 
         {/* Stats */}
         {donors.length > 0 && (
-          <div className="flex flex-wrap justify-center gap-6 mb-8">
-            <div className="bg-white text-black rounded-lg px-6 py-3 shadow font-semibold">
-              🩸 Total Donors: {allDonors}
+          <AnimatedSection animation="slideUp">
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              <div className="card text-gray-800 dark:text-white px-6 py-3 text-center">
+                <Droplets className="w-5 h-5 text-primary-600 mx-auto mb-1" />
+                <span className="font-semibold">Total: {allDonors}</span>
+              </div>
+              <div className="card text-gray-800 dark:text-white px-6 py-3 text-center">
+                <Droplets className="w-5 h-5 text-secondary-600 mx-auto mb-1" />
+                <span className="font-semibold">Compatible: {totalDonors}</span>
+              </div>
+              <div className="card text-gray-800 dark:text-white px-6 py-3 text-center">
+                <div className="w-3 h-3 bg-green-400 rounded-full mx-auto mb-1" />
+                <span className="font-semibold">Available: {availableCount}</span>
+              </div>
             </div>
+          </AnimatedSection>
+        )}
 
-            <div className="bg-white text-black rounded-lg px-6 py-3 shadow font-semibold">
-              🩸 Total Compatible Donors: {totalDonors}
+        {/* Map Toggle & Donor Map */}
+        {donors.length > 0 && (
+          <AnimatedSection animation="slideUp">
+            <div className="flex justify-end mb-3">
+              <button
+                className="btn-secondary text-sm py-2 px-4 inline-flex items-center gap-2"
+                onClick={() => setShowMap((prev) => !prev)}
+              >
+                <MapPin className="w-4 h-4" />
+                {showMap ? "Hide Map" : "Show Map"}
+              </button>
             </div>
-            <div className="bg-white text-black rounded-lg px-6 py-3 shadow font-semibold">
-              🟢 Available to Donate: {availableCount}
-            </div>
-          </div>
+            {showMap && (
+              <DonorMap
+                donors={donors}
+                onMarkerClick={(donor, index) => {
+                  const el = cardRefs.current[donor._id || index];
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    el.classList.add("ring-2", "ring-primary-400");
+                    setTimeout(() => el.classList.remove("ring-2", "ring-primary-400"), 2000);
+                  }
+                }}
+              />
+            )}
+          </AnimatedSection>
         )}
 
         {/* Donor Cards */}
         {loading ? (
-          <p className="text-center">Loading donors...</p>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => <DonorCardSkeleton key={i} />)}
+          </div>
         ) : donors.length === 0 ? (
-          <p className="text-center text-gray-200">No donors found. Try different filters.</p>
+          <p className="text-center text-gray-300">No donors found. Try different filters.</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {donors.map((donor, index) => (
-              <div
-                key={index}
-                className="bg-gray-900 rounded-lg shadow-lg p-6 text-center text-white"
-              >
-                <img
-                  src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${donor.name}`}
-                  alt={donor.name}
-                  className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-blue-500"
-                />
-                <div className="flex items-center justify-center space-x-2 mb-1">
-                  <span className="text-xl font-semibold">{donor.name}</span>
-                  <span
-                    className="w-3 h-3 rounded-full bg-green-400"
-                    title="Available"
-                  ></span>
+            {donors.map((donor, i) => (
+              <AnimatedSection key={i} animation="slideUp" delay={i * 0.05}>
+                <div
+                  ref={(el) => (cardRefs.current[donor._id || i] = el)}
+                  className="bg-gray-900 dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center text-white hover:-translate-y-1 transition-all duration-300"
+                >
+                  <img
+                    src={`https://api.dicebear.com/8.x/thumbs/svg?seed=${donor.name}`}
+                    alt={donor.name}
+                    className="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-secondary-500"
+                  />
+                  <div className="flex items-center justify-center space-x-2 mb-1">
+                    <span className="text-xl font-semibold">{donor.name}</span>
+                    <span className="w-3 h-3 rounded-full bg-green-400" title="Available" />
+                  </div>
+                  <p className="text-gray-400">{donor.bloodGroup} &bull; {donor.city}</p>
+                  <p className="text-sm mt-1 flex items-center justify-center gap-1"><Phone className="w-3 h-3" /> {donor.phone}</p>
+                  <p className="text-sm mt-1 flex items-center justify-center gap-1"><Droplets className="w-3 h-3" /> Donations: {Array.isArray(donor.donationCount) ? donor.donationCount.length : donor.donationCount}</p>
+                  <p className="text-sm flex items-center justify-center gap-1"><Calendar className="w-3 h-3" /> Last: {donor.lastDonationDate ? new Date(donor.lastDonationDate).toLocaleDateString() : "Not Yet"}</p>
+                  <div className="mt-4 flex justify-center space-x-4">
+                    <button className="btn-primary text-sm py-2 px-4">Request</button>
+                    <button className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Message</button>
+                  </div>
                 </div>
-                <p className="text-gray-400">{donor.bloodGroup} • {donor.city}</p>
-                <p className="text-sm mt-1">📞 {donor.phone}</p>
-                <p className="text-sm mt-1">🩸 Donations: {donor.donationCount}</p>
-                <p className="text-sm">
-                  📅 Last Donation:{" "}
-                  {donor.lastDonationDate
-                    ? new Date(donor.lastDonationDate).toLocaleDateString()
-                    : "Not Donated Yet"}
-                </p>
-                <div className="mt-4 flex justify-center space-x-4">
-                  <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium">
-                    Request
-                  </button>
-                  <button className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium">
-                    Message
-                  </button>
-                </div>
-              </div>
+              </AnimatedSection>
             ))}
           </div>
         )}
 
         {/* Pagination */}
         {donors.length > 0 && (
-          <div className="flex flex-col items-center gap-2 mt-8">
-            <div className="flex justify-center gap-4">
-              <button
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium"
-                disabled={pageNum === 1}
-                onClick={handlePrevBtn}
-              >
-                Prev
-              </button>
-              <button
-                className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium"
-                disabled={pageNum === totalPages}
-                onClick={handleNextBtn}
-              >
-                Next
-              </button>
-            </div>
-
-            <div className="text-center text-white font-semibold">
-              Page {pageNum} of {totalPages}
-            </div>
+          <div className="flex justify-center items-center gap-4 mt-8">
+            <button className="btn-secondary text-sm py-2 px-4 inline-flex items-center gap-1" disabled={pageNum === 1} onClick={() => { fetchSpecificDonors({ bloodGroup, city }, pageNum - 1); setPageNum(p => p - 1); }}>
+              <ChevronLeft className="w-4 h-4" /> Prev
+            </button>
+            <span className="font-semibold">Page {pageNum} of {totalPages}</span>
+            <button className="btn-secondary text-sm py-2 px-4 inline-flex items-center gap-1" disabled={pageNum === totalPages} onClick={() => { fetchSpecificDonors({ bloodGroup, city }, pageNum + 1); setPageNum(p => p + 1); }}>
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         )}
       </div>

@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer")
 const donorInfoModel = require("../models/donor.info.model");
 const { sendIneligibilityEmail, sendSuccessEmail } = require("../helpers/emailSender");
 const getAvailabilityStatus = require("../utils/getAvailabilityStatus");
+const { findCompatibleDonors } = require('../helpers/donor.helper');
 
 /**
  * Arrow Function
@@ -90,49 +91,71 @@ const userRegister = async (req, res) => {
  * database qeurry email xyz@gmail.com
  * password 123456
  */
-async function userLogin(req,res){
-    const  {email, password} = req.body;
-    try {
-        const isUserExists = await userModel.findOne({email});
-        console.log("isUserExists",isUserExists);
+async function userLogin(req, res) {
+  console.log("I am user login");
+  const { email, password } = req.body;
 
-        if(!isUserExists){
-            res.status(400).json({
-                msg: "Login failed. Please check your credentials and try again.",
-                status: 400
-            })
-        }
+  try {
+    const isUserExists = await userModel.findOne({ email });
+    console.log("isUserExists", isUserExists);
 
-        const isPasswordCorrect = await isUserExists.comparePassword(password);
-        console.log("isPasswordCorrect",isPasswordCorrect);
-
-        if(isPasswordCorrect === false){
-            res.status(400).json({
-                msg: "Password is incorrect",
-                status: 400
-            });
-        }
-
-        const accessToken = await isUserExists.accessToken();
-        console.log("Acess token:",`Bearer ${accessToken}`);
-        // token generate -> access 
-
-        res.status(200).json({
-            msg: "Login successful! We're glad to have you back.",
-            status: 200,
-            token: `Bearer ${accessToken}`,
-            id: isUserExists._id,
-            role: isUserExists.role
-        });
-
-    } catch (error) {
-        console.log("error in login controller", error.msg);
-        res.status(500).json(
-            {
-                msg: "Server error in Login Controller"
-            }
-        )
+    if (!isUserExists) {
+      return res.status(400).json({
+        msg: "Login failed. Please check your credentials and try again.",
+        status: 400,
+      });
     }
+
+    const isPasswordCorrect = await isUserExists.comparePassword(password);
+    console.log("isPasswordCorrect", isPasswordCorrect);
+
+    if (!isPasswordCorrect) {
+      return res.status(400).json({
+        msg: "Password is incorrect",
+        status: 400,
+      });
+    }
+
+    const accessToken = await isUserExists.accessToken();
+    console.log("Access token:", `Bearer ${accessToken}`);
+
+    // If patient, fetch donor data
+    if (isUserExists.role === "patient") {
+      const bloodGroup = isUserExists.bloodGroup;
+      const city = isUserExists.city;
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 9;
+
+      const donorData = await findCompatibleDonors(bloodGroup, city, page, limit);
+      console.log("city",isUserExists.city);
+      return res.status(200).json({
+        msg: "Login successful! We're glad to have you back.",
+        status: 200,
+        token: `Bearer ${accessToken}`,
+        id: isUserExists._id,
+        role: isUserExists.role,
+        name: isUserExists.name,
+        bloodGroup: isUserExists.bloodGroup, 
+        city: isUserExists.city,
+        donorData,
+      });
+    }
+
+    // For roles other than patient (e.g., admin, donor, etc.)
+    return res.status(200).json({
+      msg: "Login successful! We're glad to have you back.",
+      status: 200,
+      token: `Bearer ${accessToken}`,
+      id: isUserExists._id,
+      role: isUserExists.role,
+    });
+
+  } catch (error) {
+    console.error("Error in login controller:", error);
+    res.status(500).json({
+      msg: "Server error in Login Controller",
+    });
+  }
 }
 
 module.exports = {
