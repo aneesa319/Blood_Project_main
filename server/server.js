@@ -24,9 +24,10 @@ const contactRoute = require("./routes/contact.route");
 const chatbotRoute = require("./routes/chatbot.route");
 const db = require("./utils/db");
 
+// Connect to DB
+db();
 
 // routes
-connectServer();
 app.use("/api/user",userRoute);
 app.use("/api/location",locationRoute);
 app.use("/api/user/registration",verificationRoute);
@@ -37,13 +38,11 @@ app.use("/api/chatbot",chatbotRoute);
 
 const PORT = process.env.PORT || 5001;
 
-async function connectServer(){
-    try {
-      await db();
-      app.listen(PORT, () => {
-        console.log(`server is started on ${PORT}`)
-      })
-    } catch (error) {
-      console.log("Error has been generated in connecting the server:",error);
-    }
+// Only listen when not in serverless (Vercel)
+if (process.env.VERCEL !== "1") {
+  app.listen(PORT, () => {
+    console.log(`server is started on ${PORT}`)
+  });
 }
+
+module.exports = app;
