@@ -1,47 +1,71 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
-const locationSaveToDb = require("./zipcodeConfiguration/importZipcodes");
 const cors = require('cors');
+const mongoose = require("mongoose");
+const db = require("./utils/db");
 
 const corsOptions = {
-  origin: process.env.CLIENT_URL ? [process.env.CLIENT_URL, "http://localhost:5173", "http://localhost:5174"] : ["http://localhost:5173", "http://localhost:5174"],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.CLIENT_URL,
+      "http://localhost:5173",
+      "http://localhost:5174"
+    ].filter(Boolean);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true);
+    }
+  },
   methods: "GET, POST, PUT, PATCH, DELETE, HEAD",
   credentials: true
 }
 
 app.use(cors(corsOptions))
+app.use(express.json());
 
-// Body parsing middleware (for JSON)
-app.use(express.json()); //  required to parse JSON bodies
+// Lazy DB connection for serverless
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await db();
+    } catch (err) {
+      console.error("DB connection error:", err);
+    }
+  }
+  next();
+});
 
 const userRoute = require("./routes/auth.route");
 const locationRoute = require("./routes/zipcodes.route");
-const verificationRoute = require("./routes/email.verification.route")
+const verificationRoute = require("./routes/email.verification.route");
 const donorRoute = require("./routes/nearest.donor.route");
 const adminRoute = require("./routes/admin.route");
 const contactRoute = require("./routes/contact.route");
 const chatbotRoute = require("./routes/chatbot.route");
-const db = require("./utils/db");
-
-// Connect to DB
-db();
 
 // routes
-app.use("/api/user",userRoute);
-app.use("/api/location",locationRoute);
-app.use("/api/user/registration",verificationRoute);
-app.use("/api/donors",donorRoute);
-app.use("/api/admin",adminRoute);
-app.use("/api/contact",contactRoute);
-app.use("/api/chatbot",chatbotRoute);
+app.use("/api/user", userRoute);
+app.use("/api/location", locationRoute);
+app.use("/api/user/registration", verificationRoute);
+app.use("/api/donors", donorRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/contact", contactRoute);
+app.use("/api/chatbot", chatbotRoute);
+
+// Health check
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "Donor Recommendation API is running" });
+});
 
 const PORT = process.env.PORT || 5001;
 
-// Only listen when not in serverless (Vercel)
 if (process.env.VERCEL !== "1") {
-  app.listen(PORT, () => {
-    console.log(`server is started on ${PORT}`)
+  db().then(() => {
+    app.listen(PORT, () => {
+      console.log(`server is started on ${PORT}`);
+    });
   });
 }
 
