@@ -15,18 +15,32 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Lazy DB connection
-let isConnected = false;
+// Serverless-safe DB connection (Vercel pattern)
+const MONGODB_URI = process.env.MONGO_URI || process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/smart_donor_db";
+
+let cached = global._mongooseCache;
+if (!cached) {
+  cached = global._mongooseCache = { conn: null, promise: null };
+}
+
 const connectDB = async () => {
-  if (isConnected) return;
-  const URI = process.env.MONGO_URI || process.env.MONGO_DB_URL || "mongodb://127.0.0.1:27017/smart_donor_db";
-  try {
-    await mongoose.connect(URI);
-    isConnected = true;
-    console.log("DB connected:", URI.substring(0, 30) + "...");
-  } catch (error) {
-    console.error("DB error:", error.message);
+  if (cached.conn) return cached.conn;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 10000,
+    }).then((m) => {
+      console.log("DB connected:", MONGODB_URI.substring(0, 30) + "...");
+      return m;
+    });
   }
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+  return cached.conn;
 };
 
 app.use(async (req, res, next) => {
@@ -54,5 +68,6 @@ app.use("/api/chatbot", chatbotRoute);
 app.get("/", (req, res) => {
   res.json({ status: "ok", message: "Donor Recommendation API is running" });
 });
+
 
 module.exports = app;
