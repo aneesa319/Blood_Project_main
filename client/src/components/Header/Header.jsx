@@ -68,12 +68,6 @@ function Header() {
           Logout
         </NavLink>
       )}
-
-      {!token && (
-        <NavLink to="/registration" className={linkClass} onClick={() => setMenuOpen(false)}>
-          Register
-        </NavLink>
-      )}
     </>
   );
 

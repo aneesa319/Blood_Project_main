@@ -1,14 +1,14 @@
 const userModel = require("../models/user.model");
 const nodemailer = require("nodemailer");
 
-// Function to generate a random 6-digit code
+// Function to generate a random 4-digit code
 const generateVerificationCode = () => {
-    return Math.floor(100000 + Math.random() * 900000);
+    return Math.floor(1000 + Math.random() * 9000);
 };
 
 // Sending the email function 
 const verificationByEmail = async (req, res) => {
-    const user = "muhammadibraheem8567@gmail.com";
+    const user = process.env.EMAIL_USER || "muhammadibraheem8567@gmail.com";
     const pass = process.env.PASS;
     const registrationEmail = req.body.email;
 
@@ -29,7 +29,7 @@ const verificationByEmail = async (req, res) => {
         if (isUserAlreadyExist) {
             // Send "already registered" email
             const mailOptions = {
-                from: 'muhammadibraheem8567@gmail.com',
+                from: process.env.EMAIL_USER || 'muhammadibraheem8567@gmail.com',
                 to: registrationEmail,
                 subject: 'You Are Already Registered with LifeSaver System',
                 html: `
@@ -71,7 +71,7 @@ const verificationByEmail = async (req, res) => {
             const verificationCode = generateVerificationCode();
 
             const mailOptions = {
-                from: 'muhammadibraheem8567@gmail.com',
+                from: process.env.EMAIL_USER || 'muhammadibraheem8567@gmail.com',
                 to: registrationEmail,
                 subject: 'Your Verification Code for LifeSaver System',
                 html: `

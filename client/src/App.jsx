@@ -6,6 +6,7 @@ import About from './pages/About/About'
 import Contact from './pages/Contact/Contact'
 import Login from './pages/Login/Login'
 import Register from './pages/Register/Register'
+import AuthPage from './pages/Auth/AuthPage'
 import Logout from './pages/Logout/Logout'
 import { EmailVerificationCode } from './pages/Verification_Code/Email_Verification_Code'
 import Registration_Email from './pages/Register/Registration_Email'
@@ -48,7 +49,7 @@ export default function App() {
           },
           {
             path: '/login',
-            element: <PageTransition><Login /></PageTransition>
+            element: <PageTransition><AuthPage /></PageTransition>
           },
           {
             path: '/logout',
