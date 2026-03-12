@@ -21,7 +21,7 @@ const Register = () => {
   const [role, setRole] = useState("");
   const [lastDonationDate, setLastDonationDate] = useState();
   const [userObj, setUserObj] = useState({
-    name: "", bloodGroup: "", gender: "", age: "", phone: "", password: "", confirmPassword: ""
+    name: "", bloodGroup: "", gender: "", age: "", phone: "+92 ", password: "", confirmPassword: ""
   });
 
   const changeUserObj = (e) => {

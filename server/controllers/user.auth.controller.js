@@ -96,7 +96,7 @@ async function userLogin(req, res) {
   const { email, password } = req.body;
 
   try {
-    const isUserExists = await userModel.findOne({ email });
+    const isUserExists = await userModel.findOne({ email: email ? email.trim().toLowerCase() : "" });
     console.log("isUserExists", isUserExists);
 
     if (!isUserExists) {

@@ -123,7 +123,10 @@ const Chatbot = () => {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-24 right-6 z-50">
+      <div className="fixed bottom-24 right-6 z-50 flex items-center gap-3">
+        <div className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white px-4 py-2 rounded-full shadow-lg text-sm font-semibold whitespace-nowrap animate-bounce-subtle border border-gray-200 dark:border-gray-700">
+          🩸 Blood AI Assistant
+        </div>
         <button
           onClick={() => setIsOpen(true)}
           className="relative bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-full p-4 shadow-xl transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-red-300 floating-btn-pulse"

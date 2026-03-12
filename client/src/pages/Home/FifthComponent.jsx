@@ -70,7 +70,7 @@ function FifthComponent() {
 
         {/* CTA */}
         <AnimatedSection animation="slideUp" className="text-center mt-12">
-          <button onClick={() => navigate('/registration')} className="btn-primary">Become a Donor Today</button>
+          <button onClick={() => navigate('/login')} className="btn-primary">Become a Donor Today</button>
         </AnimatedSection>
       </div>
     </section>
