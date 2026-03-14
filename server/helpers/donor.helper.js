@@ -67,9 +67,20 @@ async function findCompatibleDonors(bloodGroup, city, page = 1, limit = 9) {
 
   // Look up zipcode from map (case-insensitive)
   const cityKey = Object.keys(cityZipcodeMap).find(k => k.toLowerCase() === city.toLowerCase());
+  
   if (!cityKey) {
-    throw new Error('City ZIP code not found');
+    // If city not in map, return empty results instead of throwing
+    return {
+      currentPage: page,
+      totalPages: 0,
+      totalDonors: await User.countDocuments({ role: 'donor' }),
+      totalCompatibleDonors: 0,
+      totalEligibleDonors: 0,
+      donors: [],
+      warning: 'City mapping not found for proximity search'
+    };
   }
+
   const patientZip = parseInt(cityZipcodeMap[cityKey]);
   const compatibleGroups = bloodCompatibility[bloodGroup];
 

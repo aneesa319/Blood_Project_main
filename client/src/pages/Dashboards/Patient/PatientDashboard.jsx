@@ -6,20 +6,32 @@ import DonorCardSkeleton from "../../../components/ui/DonorCardSkeleton";
 import AnimatedSection from "../../../components/ui/AnimatedSection";
 import TiltCard from "../../../components/ui/TiltCard";
 import DonorMap from "../../../components/Map/DonorMap";
-import { Droplets, Users, UserCheck, FileText, Phone, Calendar, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
+import { Droplets, Users, UserCheck, FileText, Phone, Calendar, ChevronLeft, ChevronRight, MapPin, X, AlertCircle } from "lucide-react";
+import { toast } from "react-toastify";
+import { postBloodRequirement } from "../../../api/bloodRequest/bloodRequest.api";
 
 function PatientDashboard() {
   const navigate = useNavigate();
   const donors = useSelector((state) => state.loginLogoutSlice.patientData.donorsForPatient);
   const patientName = useSelector((state) => state.loginLogoutSlice.name) || "Patient";
   const { totalPages, totalDonors, totalCompatibleDonors, totalEligibleDonors } = useSelector((state) => state.loginLogoutSlice.patientData);
-  const { bloodGroup, city } = useSelector((state) => state.loginLogoutSlice);
+  const { bloodGroup, city, id: userId } = useSelector((state) => state.loginLogoutSlice);
 
   const [pageNumber, setPageNum] = useState(1);
   const [flaq, setFlaq] = useState(false);
   const [donorsFromApi, setDonors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showMap, setShowMap] = useState(true);
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+  const [requestForm, setRequestForm] = useState({
+    units: 1,
+    hospitalName: "",
+    contactPhone: "",
+    urgency: "Normal",
+    requiredDate: "",
+    description: "",
+  });
   const cardRefs = useRef({});
 
   const fetchSpecificDonors = async (obj, page) => {
@@ -47,6 +59,45 @@ function PatientDashboard() {
     if (pageNumber < totalPages) {
       fetchSpecificDonors({ bloodGroup, city }, pageNumber + 1);
       setPageNum((prev) => prev + 1);
+    }
+  };
+
+  const handleRequestChange = (e) => {
+    const { name, value } = e.target;
+    setRequestForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRequestSubmit = async (e) => {
+    e.preventDefault();
+    if (!requestForm.hospitalName || !requestForm.contactPhone || !requestForm.requiredDate) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setSubmittingRequest(true);
+      const data = {
+        ...requestForm,
+        patientRefID: userId,
+        patientName,
+        bloodGroup,
+        city,
+      };
+      await postBloodRequirement(data);
+      toast.success("Blood requirement posted successfully!");
+      setShowRequestModal(false);
+      setRequestForm({
+        units: 1,
+        hospitalName: "",
+        contactPhone: "",
+        urgency: "Normal",
+        requiredDate: "",
+        description: "",
+      });
+    } catch (error) {
+      toast.error(error.msg || "Failed to post requirement");
+    } finally {
+      setSubmittingRequest(false);
     }
   };
 
@@ -85,7 +136,10 @@ function PatientDashboard() {
               <UserCheck className="w-5 h-5 text-green-600 mx-auto mb-1" />
               <span className="font-semibold">Available: {totalEligibleDonors || donors.length}</span>
             </div>
-            <button className="btn-primary inline-flex items-center gap-2">
+            <button 
+              className="btn-primary inline-flex items-center gap-2"
+              onClick={() => setShowRequestModal(true)}
+            >
               <FileText className="w-5 h-5" /> Post Blood Requirement
             </button>
           </div>
@@ -177,6 +231,161 @@ function PatientDashboard() {
           </button>
         </div>
       </div>
+
+      {/* Post Blood Requirement Modal */}
+      {showRequestModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-2xl transform transition-all duration-300 scale-100 opacity-100">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700">
+              <div className="bg-primary-600 px-6 py-4 flex items-center justify-between text-white">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Droplets className="w-6 h-6" /> Post Blood Requirement
+                </h2>
+                <button 
+                  onClick={() => setShowRequestModal(false)}
+                  className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleRequestSubmit} className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                      Blood Group <span className="text-red-500">*</span>
+                    </label>
+                    <div className="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg text-primary-600 font-bold border border-primary-100 dark:border-primary-900">
+                      {bloodGroup}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                      Units Required (Bags) <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      name="units"
+                      min="1"
+                      value={requestForm.units}
+                      onChange={handleRequestChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                      Hospital Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="hospitalName"
+                      placeholder="Enter hospital name"
+                      value={requestForm.hospitalName}
+                      onChange={handleRequestChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                      Contact Phone <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="contactPhone"
+                      placeholder="e.g. 03001234567"
+                      value={requestForm.contactPhone}
+                      onChange={handleRequestChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                      Urgency Level <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      name="urgency"
+                      value={requestForm.urgency}
+                      onChange={handleRequestChange}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all shadow-sm cursor-pointer"
+                      required
+                    >
+                      <option value="Normal" className="text-gray-900">Normal</option>
+                      <option value="Urgent" className="text-gray-900">Urgent</option>
+                      <option value="Critical" className="text-gray-900">Critical (Immediate)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                      Required By Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="requiredDate"
+                      value={requestForm.requiredDate}
+                      onChange={handleRequestChange}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all shadow-sm"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-6">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                    Additional Details
+                  </label>
+                  <textarea
+                    name="description"
+                    placeholder="Provide any additional info (e.g. specific room number, ward, etc.)"
+                    value={requestForm.description}
+                    onChange={handleRequestChange}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all h-24 resize-none shadow-sm"
+                  ></textarea>
+                </div>
+
+                <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl mb-6">
+                  <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    Your request will be visible to potential donors in <span className="font-bold">{city}</span>. Please ensure your contact details are correct.
+                  </p>
+                </div>
+
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowRequestModal(false)}
+                    className="flex-1 px-6 py-3 rounded-xl border border-gray-300 dark:border-gray-600 font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submittingRequest}
+                    className="flex-1 px-6 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow-lg shadow-primary-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {submittingRequest ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Posting...
+                      </>
+                    ) : (
+                      "Post Requirement"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

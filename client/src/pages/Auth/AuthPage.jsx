@@ -60,11 +60,10 @@ function AuthPage() {
       if (status === 400) { toast.error(msg); return; }
       if (status === 200) {
         toast.success(msg);
-        const role = localStorage.getItem('userRole');
-        const id = localStorage.getItem('userId');
-        if (role === 'admin') navigate(`/admin/${id}/dashboard/`);
-        else if (role === 'patient') navigate(`/patient/${id}/dashboard/`);
-        else if (role === 'donor') navigate(`/donor/${id}/dashboard/`);
+        const { id, role } = res.payload;
+        if (role === 'admin') navigate(`/admin/${id}/dashboard`);
+        else if (role === 'patient') navigate(`/patient/${id}/dashboard`);
+        else if (role === 'donor') navigate(`/donor/${id}/dashboard`);
         else navigate('/');
       }
     } catch (err) {

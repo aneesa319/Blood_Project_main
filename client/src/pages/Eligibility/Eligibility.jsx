@@ -181,7 +181,7 @@ function Eligibility() {
               If you meet the basic criteria above, you&apos;re likely eligible to donate. Register now and save lives!
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button onClick={() => navigate('/registration')} className="btn-primary inline-flex items-center gap-2">
+              <button onClick={() => navigate('/login')} className="btn-primary inline-flex items-center gap-2">
                 Register Now <ArrowRight className="w-4 h-4" />
               </button>
               <button onClick={() => navigate('/donation-process')} className="btn-secondary">

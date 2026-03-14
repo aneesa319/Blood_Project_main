@@ -12,11 +12,11 @@ function NineComponent() {
           Help save lives by joining our blood donation mission today.
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <button onClick={() => navigate('/registration')} className="animate-pulse_glow btn-primary inline-flex items-center justify-center gap-2">
+          <button onClick={() => navigate('/login')} className="animate-pulse_glow btn-primary inline-flex items-center justify-center gap-2">
             <Heart className="w-5 h-5" /> Donate Now
           </button>
-          <button onClick={() => navigate('/about')} className="btn-secondary border-2 border-white text-white hover:bg-white hover:text-secondary-600 dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-secondary-600 inline-flex items-center justify-center gap-2">
-            <BookOpen className="w-5 h-5" /> Learn More
+          <button onClick={() => navigate('/about')} style={{ backgroundColor: 'white', color: '#1e40af', border: '2px solid white', padding: '12px 24px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+            <BookOpen className="w-5 h-5" /> Read More
           </button>
         </div>
       </AnimatedSection>

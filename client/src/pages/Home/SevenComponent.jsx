@@ -59,7 +59,7 @@ function SevenComponent() {
                   <LogIn className="w-5 h-5" /> Login
                 </button>
                 <button
-                  onClick={() => navigate('/registration')}
+                  onClick={() => navigate('/login')}
                   className="btn-secondary inline-flex items-center justify-center gap-2"
                 >
                   <UserPlus className="w-5 h-5" /> Register

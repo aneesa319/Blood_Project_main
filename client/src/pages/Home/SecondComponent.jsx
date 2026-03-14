@@ -27,7 +27,7 @@ function SecondComponent() {
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           We believe in the power of community and the life-saving impact of blood donation. Our mission is to ensure a steady supply of safe and accessible blood for patients in need. We are dedicated to raising awareness about the importance of blood donation and providing support to donors throughout their journey.
         </p>
-        <button onClick={() => navigate('/registration')} className="btn-primary inline-flex items-center gap-2">
+        <button onClick={() => navigate('/login')} className="btn-primary inline-flex items-center gap-2">
           <Heart className="w-5 h-5" />
           Donate Now
         </button>

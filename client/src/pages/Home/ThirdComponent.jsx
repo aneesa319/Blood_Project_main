@@ -59,7 +59,7 @@ function ThirdComponent() {
                   card.title === 'Volunteer Team' ? '/volunteer' :
                   '/spread-awareness'
                 )} className="btn-primary text-sm py-2 px-4 inline-flex items-center gap-1">
-                  Learn More <ArrowRight className="w-4 h-4" />
+                  Read More <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>

@@ -92,8 +92,8 @@ const userRegister = async (req, res) => {
  * password 123456
  */
 async function userLogin(req, res) {
-  console.log("I am user login");
   const { email, password } = req.body;
+  console.log("I am user login", email);
 
   try {
     const isUserExists = await userModel.findOne({ email: email ? email.trim().toLowerCase() : "" });
@@ -107,7 +107,6 @@ async function userLogin(req, res) {
     }
 
     const isPasswordCorrect = await isUserExists.comparePassword(password);
-    console.log("isPasswordCorrect", isPasswordCorrect);
 
     if (!isPasswordCorrect) {
       return res.status(400).json({
@@ -117,6 +116,11 @@ async function userLogin(req, res) {
     }
 
     const accessToken = await isUserExists.accessToken();
+
+    if (!accessToken) {
+       throw new Error('Token generation failed');
+    }
+
     console.log("Access token:", `Bearer ${accessToken}`);
 
     // If patient, fetch donor data
@@ -126,8 +130,13 @@ async function userLogin(req, res) {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 9;
 
-      const donorData = await findCompatibleDonors(bloodGroup, city, page, limit);
-      console.log("city",isUserExists.city);
+      let donorData = null;
+      try {
+        donorData = await findCompatibleDonors(bloodGroup, city, page, limit);
+      } catch (searchError) {
+        donorData = { donors: [], totalDonors: 0, error: searchError.message };
+      }
+
       return res.status(200).json({
         msg: "Login successful! We're glad to have you back.",
         status: 200,
@@ -148,6 +157,9 @@ async function userLogin(req, res) {
       token: `Bearer ${accessToken}`,
       id: isUserExists._id,
       role: isUserExists.role,
+      name: isUserExists.name,
+      bloodGroup: isUserExists.bloodGroup,
+      city: isUserExists.city,
     });
 
   } catch (error) {

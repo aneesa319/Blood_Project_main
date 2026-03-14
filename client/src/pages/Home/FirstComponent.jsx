@@ -138,7 +138,6 @@ function FirstComponent() {
 
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold font-heading mb-6 text-white min-h-[3.5rem] md:min-h-[4rem]">
           {displayText}
-          <span className="animate-pulse">|</span>
         </h1>
 
         <motion.p
@@ -150,21 +149,19 @@ function FirstComponent() {
           All types of blood are needed to help patients.
         </motion.p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.5, duration: 0.6 }}
-          className="flex flex-col md:flex-row justify-center gap-4"
-        >
-          <button onClick={() => navigate('/donation-process')} className="btn-primary flex items-center justify-center gap-2">
+        <div className="flex flex-col md:flex-row justify-center gap-4">
+          <button
+            onClick={() => navigate('/donation-process')}
+            className="btn-primary flex items-center justify-center gap-2"
+          >
             <Heart className="w-5 h-5" />
             Donation Process
           </button>
-          <button onClick={() => navigate('/eligibility')} className="btn-secondary border-2 border-white text-white hover:bg-white hover:text-secondary-700 dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-secondary-700">
+          <button onClick={() => navigate('/eligibility')} style={{ backgroundColor: 'white', color: '#1e40af', border: '2px solid white', padding: '12px 24px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <ClipboardList className="w-5 h-5 mr-2" />
             Eligibility Criteria
           </button>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

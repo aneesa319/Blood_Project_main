@@ -99,7 +99,7 @@ const Chatbot = () => {
 
       const errorMessage = {
         id: Date.now() + 1,
-        text: "Sorry, I'm having trouble connecting right now. Please try again in a moment.\n\n**Quick links:**\n* Search Donors: /search/Donors\n* Register: /registration\n* Eligibility: /eligibility\n* Contact: /contact",
+        text: "Sorry, I'm having trouble connecting right now. Please try again in a moment.\n\n**Quick links:**\n* Login: /login\n* Search Donors: /search/Donors\n* Eligibility: /eligibility\n* Contact: /contact",
         isUser: false,
         timestamp: new Date().toISOString(),
         isError: true
@@ -125,7 +125,7 @@ const Chatbot = () => {
     return (
       <div className="fixed bottom-24 right-6 z-50 flex items-center gap-3">
         <div className="bg-white dark:bg-gray-800 text-gray-800 dark:text-white px-4 py-2 rounded-full shadow-lg text-sm font-semibold whitespace-nowrap animate-bounce-subtle border border-gray-200 dark:border-gray-700">
-          🩸 Blood AI Assistant
+          🩸 AI Assistant
         </div>
         <button
           onClick={() => setIsOpen(true)}

@@ -253,7 +253,7 @@ function HowToDonate() {
               Every donation counts. Register now and become a life-saving hero.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button onClick={() => navigate('/registration')} className="btn-primary inline-flex items-center gap-2">
+              <button onClick={() => navigate('/login')} className="btn-primary inline-flex items-center gap-2">
                 Register to Donate <ArrowRight className="w-4 h-4" />
               </button>
               <button onClick={() => navigate('/eligibility')} className="btn-secondary">

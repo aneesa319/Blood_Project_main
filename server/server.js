@@ -1,4 +1,9 @@
 require("dotenv").config();
+
+// Fix for MongoDB Atlas DNS resolution (ECONNREFUSED on querySrv)
+// Forces Node.js to use Google DNS instead of ISP DNS
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const express = require("express");
 const app = express();
 const cors = require('cors');
@@ -44,6 +49,7 @@ const donorRoute = require("./routes/nearest.donor.route");
 const adminRoute = require("./routes/admin.route");
 const contactRoute = require("./routes/contact.route");
 const chatbotRoute = require("./routes/chatbot.route");
+const bloodRequestRoute = require("./routes/bloodRequest.route");
 
 // routes
 app.use("/api/user", userRoute);
@@ -53,6 +59,7 @@ app.use("/api/donors", donorRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/contact", contactRoute);
 app.use("/api/chatbot", chatbotRoute);
+app.use("/api/blood-request", bloodRequestRoute);
 
 // Health check
 app.get("/", (req, res) => {

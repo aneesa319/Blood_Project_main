@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { Droplets, Calendar, Upload, ToggleLeft, ToggleRight, User, Mail, Phone, MapPin, Heart, AlertCircle, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { getAllBloodRequirements } from "../../../api/bloodRequest/bloodRequest.api";
+import { toast } from "react-toastify";
+import API from "../../../api/axiosInstance";
 import AnimatedSection from "../../../components/ui/AnimatedSection";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
-import { Droplets, Calendar, Upload, ToggleLeft, ToggleRight, User, Mail, Phone, MapPin, Heart } from "lucide-react";
 
 const currentDonorName = "Muhammad Ashiq";
 
@@ -27,11 +31,38 @@ const mockDonorInfo = {
 };
 
 function DonorDashboard() {
+  const { name: currentDonorName, userId, city, bloodGroup } = useSelector((state) => state.loginLogoutSlice);
   const [available, setAvailable] = useState(mockDonorInfo.available);
   const [certificate, setCertificate] = useState(null);
+  const [nearbyRequests, setNearbyRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
   const [statsRef, statsInView] = useInView({ triggerOnce: true, threshold: 0.3 });
 
-  const handleAvailabilityToggle = () => setAvailable((prev) => !prev);
+  // Use effect to fetch nearby blood requests
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        setLoadingRequests(true);
+        const response = await getAllBloodRequirements(city);
+        setNearbyRequests(response.data || []);
+      } catch (error) {
+        console.error("Failed to fetch nearby requests:", error);
+      } finally {
+        setLoadingRequests(false);
+      }
+    };
+    if (city) fetchRequests();
+  }, [city]);
+
+  const handleAvailabilityToggle = async () => {
+    try {
+      // In a real app, you'd send this to the server
+      setAvailable((prev) => !prev);
+      toast.info(`Status updated to ${!available ? 'Available' : 'Unavailable'}`);
+    } catch (err) {
+      toast.error("Failed to update status");
+    }
+  };
   const handleCertificateUpload = (e) => setCertificate(e.target.files[0]);
 
   const profile = mockDonorInfo.userProfile;
@@ -98,6 +129,67 @@ function DonorDashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        </AnimatedSection>
+
+        {/* Nearby Blood Requirements */}
+        <AnimatedSection animation="slideUp">
+          <div className="mb-8">
+            <h3 className="text-xl font-bold font-heading mb-4 flex items-center gap-2">
+              <AlertCircle className="w-6 h-6 text-primary-400" /> Nearby Blood Requirements ({city})
+            </h3>
+            
+            {loadingRequests ? (
+              <div className="flex justify-center py-8">
+                <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : nearbyRequests.length > 0 ? (
+              <div className="grid gap-4">
+                {nearbyRequests.map((req) => (
+                  <div key={req._id} className="bg-white/10 backdrop-blur-md rounded-xl p-5 border border-white/20 hover:bg-white/15 transition-all">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-primary-600 rounded-lg flex items-center justify-center text-2xl font-bold shrink-0">
+                          {req.bloodGroup}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-lg">{req.hospitalName}</h4>
+                          <p className="text-gray-300 text-sm flex items-center gap-1">
+                            {req.patientName} &bull; {req.units} units required
+                          </p>
+                          <div className={`mt-2 inline-block px-2 py-0.5 rounded text-xs font-bold uppercase ${
+                            req.urgency === 'Critical' ? 'bg-red-600' : req.urgency === 'Urgent' ? 'bg-orange-600' : 'bg-blue-600'
+                          }`}>
+                            {req.urgency}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <p className="text-sm font-semibold flex items-center justify-end gap-1">
+                          <Calendar className="w-4 h-4" /> By: {new Date(req.requiredDate).toLocaleDateString()}
+                        </p>
+                        <a 
+                          href={`tel:${req.contactPhone}`}
+                          className="btn-primary py-2 px-4 shadow-lg shadow-primary-500/20 flex items-center gap-2 text-sm justify-center"
+                        >
+                          <Phone className="w-4 h-4" /> Call Patient
+                        </a>
+                      </div>
+                    </div>
+                    {req.description && (
+                      <p className="mt-4 text-sm text-gray-400 bg-black/20 p-3 rounded-lg border border-white/5 italic">
+                        "{req.description}"
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 bg-white/5 rounded-2xl border border-dashed border-white/10">
+                <Droplets className="w-12 h-12 text-white/20 mx-auto mb-2" />
+                <p className="text-gray-400">No active blood requirements in your city.</p>
+              </div>
+            )}
           </div>
         </AnimatedSection>
 

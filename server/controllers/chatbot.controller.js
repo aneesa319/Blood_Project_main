@@ -62,7 +62,7 @@ const handleChatMessage = async (req, res) => {
 
     const fallbackResponse = "I'm having trouble connecting right now. Here are some quick links:\n\n" +
       "**Search Donors**: Visit /search/Donors\n" +
-      "**Register**: Go to /registration\n" +
+      "**Login**: Go to /login\n" +
       "**Eligibility**: Check /eligibility\n" +
       "**Contact**: Visit /contact\n\n" +
       "I'll be back online shortly!";

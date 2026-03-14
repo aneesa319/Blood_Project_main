@@ -37,12 +37,11 @@ function Login() {
 
       if (status === 200) {
         toast.success(msg);
-        const role = localStorage.getItem("userRole");
-        const id = localStorage.getItem("userId");
+        const { id, role } = res.payload;
 
-        if (role === "admin") navigate(`/admin/${id}/dashboard/`);
-        else if (role === "patient") navigate(`/patient/${id}/dashboard/`);
-        else if (role === "donor") navigate(`/donor/${id}/dashboard/`);
+        if (role === "admin") navigate(`/admin/${id}/dashboard`);
+        else if (role === "patient") navigate(`/patient/${id}/dashboard`);
+        else if (role === "donor") navigate(`/donor/${id}/dashboard`);
         else navigate("/");
       }
     } catch (err) {

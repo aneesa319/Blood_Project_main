@@ -21,7 +21,7 @@ function FourthComponent() {
           Through innovation, community engagement, and transparency, we aim to eliminate delays in critical situations and ensure a seamless donation experience for both donors and recipients across the country.
         </p>
         <button onClick={() => navigate('/about')} className="btn-primary inline-flex items-center gap-2">
-          Learn More <ArrowRight className="w-5 h-5" />
+          Read More <ArrowRight className="w-5 h-5" />
         </button>
       </AnimatedSection>
 
